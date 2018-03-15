@@ -225,16 +225,22 @@ input[type=submit] {
 	margin-right: 5px;
 }
 
+/* ==========================================================================
+   Notifications
+   ========================================================================== */
 
-
-
-
-
-
-
-
-
-
-
-
-
+.notification {
+	text-align: center;
+	padding: 10px 20px;
+	border-radius: 4px;
+	color: #fff;
+}
+.success {
+	background: #70DA8B;
+	color: #4DA463;
+}
+.error {
+	background: #FFE6B2;
+	color: #C5A14E;
+	margin-bottom: 20px;
+}
