@@ -16,7 +16,7 @@
                 <div class="site-header">
                     <a class="logo" href="{{ url_for('index') }}"><i class="material-icons">library_books</i></a>
                     {% if current_user.is_authenticated %}
-                    <!-- <a href="#" title="User Home">Hello {{ current_user.email }}</a> -->
+                    <a href="#" title="User Home">Hello {{ current_user.username }}</a>
                     <a class="button icon-right" href="{{ url_for('logout') }}"><span>Logout</span></a>
                     <a class="button icon-right" href="{{ url_for('entry') }}"><span>New Entry</span> <i class="material-icons">add</i></a>
                     {% else %}

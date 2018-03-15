@@ -9,6 +9,7 @@ DATABASE = SqliteDatabase('journal.db')
 
 
 class User(UserMixin, Model):
+    username = CharField(unique=True)
     email = CharField(unique=True)
     password = CharField(max_length=64)
     created_date = DateTimeField(default=datetime.datetime.now)
@@ -19,10 +20,11 @@ class User(UserMixin, Model):
         order_by = ('-created_date', )
 
     @classmethod
-    def create_user(cls, email, password, admin=False):
+    def create_user(cls, username, email, password, admin=False):
         try:
             with DATABASE.transaction():
                 cls.create(
+                    username=username,
                     email=email,
                     password=generate_password_hash(password),
                     is_admin=admin,

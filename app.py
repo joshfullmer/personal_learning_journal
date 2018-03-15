@@ -111,13 +111,14 @@ def entry():
         )
         flash("Entry created! Thanks!", "success")
         return redirect(url_for('index'))
-    return render_template('new.html', form=form)
+    return render_template('entry.html', form=form)
 
 
 if __name__ == '__main__':
     models.initialize()
     try:
         models.User.create_user(
+            username="joshfullmer",
             email="joshfullmer@me.com",
             password="password",
             admin=True
