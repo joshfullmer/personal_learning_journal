@@ -49,12 +49,43 @@ def after_request(response):
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    entries = models.Entry.select().limit(5)
+    return render_template('index.html', entries=entries, view_all=True)
 
 
 @app.route('/entries')
 def entry_list():
-    pass
+    entries = models.Entry.select()
+    return render_template('index.html', entries=entries, view_all=False)
+
+
+@app.route('/entries/<int:entry_id>')
+def view_entry(entry_id):
+    entry = models.Entry.select().where(models.Entry.id == entry_id).get()
+    if not entry:
+        abort(404)
+    return render_template('detail.html', entry=entry)
+
+
+@app.route('/entries/<int:entry_id>/edit/', methods=('GET', 'POST'))
+def edit_entry(entry_id):
+    entry = models.Entry.select().where(models.Entry.id == entry_id).get()
+    form = forms.EntryForm(obj=entry)
+    if not entry:
+        abort(404)
+    if form.validate_on_submit():
+        q = models.Entry.update(
+            user=g.user._get_current_object(),
+            title=form.title.data.strip(),
+            date=(form.date.data or datetime.datetime.now()),
+            time_spent=form.time_spent.data,
+            what_you_learned=form.what_you_learned.data.strip(),
+            resources_to_remember=form.resources_to_remember.data.strip(),
+        ).where(models.Entry.id == entry.id)
+        q.execute()
+        flash("Entry updated! Thanks!", "success")
+        return redirect(url_for('index'))
+    return render_template('entry.html', form=form)
 
 
 @app.route('/signup', methods=('GET', 'POST'))

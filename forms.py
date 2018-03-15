@@ -44,7 +44,8 @@ class EntryForm(FlaskForm):
     title = StringField('Title')
     date = DateTimeField(
         'Date (optional)',
-        validators=[Optional()]
+        validators=[Optional()],
+        format="%m/%d/%Y",
     )
     time_spent = IntegerField('Time Spent')
     what_you_learned = TextAreaField('What You Learned')
