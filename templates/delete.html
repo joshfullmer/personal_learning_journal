@@ -1,0 +1,10 @@
+{% extends "index.html" %}
+
+{% block content %}
+<form method="POST" action="{{ url_for('delete_entry', entry_id=entry.id) }}">
+    {{ form.hidden_tag() }}
+    <p>Are you sure you want to delete?</p>
+    <button class="button" type="submit" id="submit">Confirm</button>
+    <a class="button" href="{{ url_for('view_entry', entry_id=entry.id) }}">Cancel</a>
+</form>
+{% endblock %}

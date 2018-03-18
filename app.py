@@ -49,13 +49,13 @@ def after_request(response):
 
 @app.route('/')
 def index():
-    entries = models.Entry.select().limit(5)
+    entries = models.Entry.select().limit(5).order_by(models.Entry.date.desc())
     return render_template('index.html', entries=entries, view_all=True)
 
 
 @app.route('/entries')
 def entry_list():
-    entries = models.Entry.select()
+    entries = models.Entry.select().order_by(models.Entry.date.desc())
     return render_template('index.html', entries=entries, view_all=False)
 
 
@@ -88,12 +88,24 @@ def edit_entry(entry_id):
     return render_template('entry.html', form=form)
 
 
+@app.route('/entries/<int:entry_id>/delete/', methods=('GET', 'POST'))
+def delete_entry(entry_id):
+    entry = models.Entry.get_by_id(entry_id)
+    form = forms.DeleteEntryForm()
+    if form.validate_on_submit():
+        models.Entry.delete_by_id(entry_id)
+        flash("Entry successfully deleted!", "success")
+        return redirect(url_for('entry_list'))
+    return render_template('delete.html', entry=entry, form=form)
+
+
 @app.route('/signup', methods=('GET', 'POST'))
 def signup():
     form = forms.SignupForm()
     if form.validate_on_submit():
         flash("You have registered successfully. Thanks!", "success")
         models.User.create_user(
+            username=form.username.data,
             email=form.email.data,
             password=form.password.data
         )
@@ -132,7 +144,7 @@ def logout():
 def entry():
     form = forms.EntryForm()
     if form.validate_on_submit():
-        models.Entry.create(
+        models.Entry.create_entry(
             user=g.user._get_current_object(),
             title=form.title.data.strip(),
             date=(form.date.data or datetime.datetime.now()),

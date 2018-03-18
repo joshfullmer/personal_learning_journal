@@ -3,6 +3,7 @@ import datetime
 from flask_bcrypt import generate_password_hash
 from flask_login import UserMixin
 from peewee import *
+from slugify import slugify
 
 
 DATABASE = SqliteDatabase('journal.db')
@@ -40,10 +41,35 @@ class Entry(Model):
     what_you_learned = TextField()
     resources_to_remember = TextField()
     user = ForeignKeyField(User, backref='entries')
+    slug = CharField(max_length=100, unique=True)
 
     class Meta:
         database = DATABASE
         order_by = ('-date', )
+
+    @classmethod
+    def create_entry(cls, title, date, time_spent, what_you_learned,
+                     resources_to_remember, user):
+        slug = slugify(title)
+        existing_slugs = []
+        for s in cls.select(cls.slug).where(cls.slug.contains(slug)):
+            existing_slugs.append(s.slug)
+        if existing_slugs:
+            slug_check = slug
+            slug_num = 1
+            while slug_check in existing_slugs:
+                slug_check = slug + str(slug_num)
+                slug_num += 1
+            slug = slug_check
+        cls.create(
+            title=title,
+            date=date,
+            time_spent=time_spent,
+            what_you_learned=what_you_learned,
+            resources_to_remember=resources_to_remember,
+            user=user,
+            slug=slug,
+        )
 
 
 def initialize():
