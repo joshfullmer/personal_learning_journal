@@ -22,6 +22,8 @@ app.secret_key = ("It's the questions we can't answer that teach us the most."
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
+login_manager.login_message = 'Please login to access this page.'
+login_manager.login_message_category = 'error'
 
 
 @login_manager.user_loader
@@ -59,17 +61,18 @@ def entry_list():
     return render_template('index.html', entries=entries, view_all=False)
 
 
-@app.route('/entries/<int:entry_id>')
-def view_entry(entry_id):
-    entry = models.Entry.select().where(models.Entry.id == entry_id).get()
+@app.route('/entries/<slug>')
+def view_entry(slug):
+    entry = models.Entry.select().where(models.Entry.slug == slug).get()
     if not entry:
         abort(404)
     return render_template('detail.html', entry=entry)
 
 
-@app.route('/entries/<int:entry_id>/edit/', methods=('GET', 'POST'))
-def edit_entry(entry_id):
-    entry = models.Entry.select().where(models.Entry.id == entry_id).get()
+@app.route('/entries/<slug>/edit/', methods=('GET', 'POST'))
+@login_required
+def edit_entry(slug):
+    entry = models.Entry.select().where(models.Entry.slug == slug).get()
     form = forms.EntryForm(obj=entry)
     if not entry:
         abort(404)
@@ -88,9 +91,10 @@ def edit_entry(entry_id):
     return render_template('entry.html', form=form)
 
 
-@app.route('/entries/<int:entry_id>/delete/', methods=('GET', 'POST'))
-def delete_entry(entry_id):
-    entry = models.Entry.get_by_id(entry_id)
+@app.route('/entries/<slug>/delete/', methods=('GET', 'POST'))
+@login_required
+def delete_entry(slug):
+    entry = models.Entry.select().where(models.Entry.slug == slug).get()
     form = forms.DeleteEntryForm()
     if form.validate_on_submit():
         models.Entry.delete_by_id(entry_id)
