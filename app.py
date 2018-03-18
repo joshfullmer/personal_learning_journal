@@ -1,4 +1,4 @@
-from flask import Flask, render_template, flash, redirect, url_for, g
+from flask import Flask, render_template, flash, redirect, url_for, g, abort
 from flask_bcrypt import check_password_hash
 from flask_login import (LoginManager, login_user, logout_user, login_required,
                          current_user)
@@ -67,6 +67,19 @@ def view_entry(slug):
     if not entry:
         abort(404)
     return render_template('detail.html', entry=entry)
+
+
+@app.route('/entries/by/<username>')
+def user_entries(username):
+    try:
+        entries = (models.User.select()
+                              .where(models.User.username == username)
+                              .get()
+                              .entries
+                              .order_by(models.Entry.date.desc()))
+    except models.DoesNotExist:
+        abort(404)
+    return render_template('index.html', entries=entries, view_all=True)
 
 
 @app.route('/entries/<slug>/edit/', methods=('GET', 'POST'))
