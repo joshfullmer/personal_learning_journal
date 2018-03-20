@@ -10,6 +10,7 @@ DATABASE = SqliteDatabase('journal.db')
 
 
 class User(UserMixin, Model):
+    """Standard user model for logging in"""
     username = CharField(unique=True)
     email = CharField(unique=True)
     password = CharField(max_length=64)
@@ -22,6 +23,7 @@ class User(UserMixin, Model):
 
     @classmethod
     def create_user(cls, username, email, password, admin=False):
+        """Create user with hashed password"""
         try:
             with DATABASE.transaction():
                 cls.create(
@@ -35,6 +37,7 @@ class User(UserMixin, Model):
 
 
 class Entry(Model):
+    """Holds data related to a learning journal entry"""
     title = CharField(max_length=100)
     date = DateTimeField(default=datetime.datetime.now)
     time_spent = IntegerField()
@@ -50,6 +53,12 @@ class Entry(Model):
     @classmethod
     def create_entry(cls, title, date, time_spent, what_you_learned,
                      resources_to_remember, user):
+        """Creates an entry from given data.  Handles slug creation and the
+        date of creation"""
+
+        # Check if slug already exists in database
+        # If it does, adds a sequential number to the end of the slug until
+        # it's a unique slug
         slug = slugify(title)
         existing_slugs = []
         for s in cls.select(cls.slug).where(cls.slug.contains(slug)):
