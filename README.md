@@ -1,3 +1,3 @@
 # Login data for test database
-- Email: joshfullmer@me.com
+- Email: test@test.com
 - Password: password
