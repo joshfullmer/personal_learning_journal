@@ -1,4 +1,5 @@
-from flask import Flask, render_template, flash, redirect, url_for, g, abort
+from flask import (Flask, render_template, flash, redirect, url_for, g, abort,
+                   request)
 from flask_bcrypt import check_password_hash
 from flask_login import (LoginManager, login_user, logout_user, login_required,
                          current_user)
@@ -59,6 +60,14 @@ def index():
     return render_template('index.html', entries=entries, view_all=True)
 
 
+def get_entry_or_404(slug):
+    try:
+        entry = models.Entry.select().where(models.Entry.slug == slug).get()
+    except models.DoesNotExist:
+        abort(404)
+    return entry
+
+
 @app.route('/entries')
 def entry_list():
     """Show all entries"""
@@ -66,13 +75,17 @@ def entry_list():
     return render_template('index.html', entries=entries, view_all=False)
 
 
-@app.route('/entries/<slug>')
+@app.route('/entries/<slug>/')
 def view_entry(slug):
     """Show entry by given slug"""
-    entry = models.Entry.select().where(models.Entry.slug == slug).get()
+    entry = get_entry_or_404(slug)
+    entry_tags = (models.Tag.select()
+                            .join(models.EntryTag)
+                            .join(models.Entry)
+                            .where(models.Entry.id == entry.id))
     if not entry:
         abort(404)
-    return render_template('detail.html', entry=entry)
+    return render_template('detail.html', entry=entry, entry_tags=entry_tags)
 
 
 @app.route('/entries/by/<username>')
@@ -113,10 +126,8 @@ def entry():
 @login_required
 def edit_entry(slug):
     """Edit an existing entry using a slug as lookup"""
-    entry = models.Entry.select().where(models.Entry.slug == slug).get()
+    entry = get_entry_or_404(slug)
     form = forms.EntryForm(obj=entry)
-    if not entry:
-        abort(404)
     if form.validate_on_submit():
         # Entry retains the same slug as-is
         q = models.Entry.update(
@@ -133,11 +144,71 @@ def edit_entry(slug):
     return render_template('entry.html', form=form)
 
 
+@app.route('/tags/create/', methods=('GET', 'POST'))
+@login_required
+def tag():
+    form = forms.TagForm()
+    if form.validate_on_submit():
+        models.Tag.create(name=form.name.data)
+        flash("Tag created!", "success")
+        return redirect(url_for('index'))
+    return render_template('tag.html', form=form)
+
+
+@app.route('/entries/<slug>/tags/', methods=('GET', 'POST'))
+@login_required
+def apply_tag(slug):
+    form = forms.EntryTagForm(request.form)
+    tags = models.Tag.select()
+    entry = get_entry_or_404(slug)
+    form.tags.choices = [(tag.id, tag.name) for tag in tags]
+    if form.validate_on_submit():
+        entry_tags = (models.EntryTag.select()
+                                     .where(models.EntryTag.entry == entry.id))
+        existing_entry_tags = []
+        for entry_tag in entry_tags:
+            existing_entry_tags += [entry_tag.tag.id]
+        for selection in request.form.getlist('tags'):
+            if int(selection) in existing_entry_tags:
+                continue
+            models.EntryTag.create(
+                entry=entry.id,
+                tag=selection
+            )
+        flash("Tags applied!", "success")
+        return redirect(url_for('view_entry', slug=slug))
+    return render_template('apply_tag.html', form=form, tags=tags, slug=slug)
+
+
+@app.route('/entries/<slug>/tags/remove/', methods=('GET', 'POST'))
+@login_required
+def remove_tag(slug):
+    form = forms.EntryTagForm(request.form)
+    entry = get_entry_or_404(slug)
+    e_id = entry.id
+    entry_tags = (models.EntryTag.select()
+                                 .where(models.EntryTag.entry == entry.id))
+    entry_tag_ids = [et.tag.id for et in entry_tags]
+    tags = models.Tag.select().where(models.Tag.id in entry_tag_ids)
+    form.tags.choices = [(tag.id, tag.name) for tag in tags]
+    if form.validate_on_submit():
+        selections = [int(s) for s in request.form.getlist('tags')]
+        tags = models.Tag.select().where(models.Tag.id << selections)
+        q = models.EntryTag.delete().where(
+            (models.EntryTag.entry == entry) &
+            (models.EntryTag.tag << tags)
+        )
+        q.execute()
+        flash("Tags removed", "success")
+        return redirect(url_for('view_entry', slug=slug))
+    return render_template('remove_tag.html', form=form, tags=tags, slug=slug)
+
+
 @app.route('/entries/<slug>/delete/', methods=('GET', 'POST'))
 @login_required
 def delete_entry(slug):
     """Delete entry using given slug as lookup"""
-    entry = models.Entry.select().where(models.Entry.slug == slug).get()
+    entry = get_entry_or_404(slug)
     form = forms.DeleteEntryForm()
     if form.validate_on_submit():
         models.Entry.delete_by_id(entry.id)

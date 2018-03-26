@@ -1,0 +1,14 @@
+{% extends "index.html" %}
+{% from "macros.html" import render_field %}
+
+{% block content %}
+<form method="POST" action="">
+    {{ form.hidden_tag() }}
+    {% for field in form %}
+        {{ render_field(field) }}
+    {% endfor %}
+    <button class="button" type="submit" id="submit">Apply Tag</button>
+    <a class="button" href="{{ url_for('tag') }}">Create New Tag</a>
+    <a class="button" href="{{ url_for('view_entry', slug=slug) }}">Cancel</a>
+</form>
+{% endblock %}

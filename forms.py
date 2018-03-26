@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import (StringField, PasswordField, DateTimeField, IntegerField,
-                     TextAreaField)
+                     TextAreaField, SelectMultipleField)
 from wtforms.validators import (DataRequired, Email, ValidationError, Length,
                                 EqualTo, Optional, Regexp)
 
@@ -71,3 +71,11 @@ class EntryForm(FlaskForm):
 
 class DeleteEntryForm(FlaskForm):
     pass
+
+
+class TagForm(FlaskForm):
+    name = StringField('Tag Name')
+
+
+class EntryTagForm(FlaskForm):
+    tags = SelectMultipleField('Tags', coerce=int)

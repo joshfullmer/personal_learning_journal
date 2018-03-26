@@ -81,7 +81,23 @@ class Entry(Model):
         )
 
 
+class Tag(Model):
+    name = CharField(max_length=50)
+
+    class Meta:
+        database = DATABASE
+        order_by = ('name', )
+
+
+class EntryTag(Model):
+    entry = ForeignKeyField(Entry, backref='entries')
+    tag = ForeignKeyField(Tag, backref='tags')
+
+    class Meta:
+        database = DATABASE
+
+
 def initialize():
     DATABASE.connect()
-    DATABASE.create_tables([User, Entry], safe=True)
+    DATABASE.create_tables([User, Entry, Tag, EntryTag], safe=True)
     DATABASE.close()

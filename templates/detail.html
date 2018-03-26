@@ -23,9 +23,21 @@
             {% endfor %}
         </ul>
     </div>
+    {% if entry_tags %}
+    <div class="entry">
+        <h3>Tags:</h3>
+        <ul>
+            {% for tag in entry_tags %}
+            <li>{{ tag.name }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
 </article>
 {% if current_user.is_authenticated and current_user.id == entry.user.id %}
 <div class="edit">
+    <p><a class="button" href="{{ url_for('apply_tag', slug=entry.slug) }}">Apply Tag</a></p>
+    <p><a class="button" href="{{ url_for('remove_tag', slug=entry.slug) }}">Remove Tag</a></p>
     <p><a class="button" href="{{ url_for('edit_entry', slug=entry.slug) }}">Edit Entry</a></p>
     <p><a class="button" href="{{ url_for('delete_entry', slug=entry.slug) }}">Delete Entry</a></p>
 </div>
