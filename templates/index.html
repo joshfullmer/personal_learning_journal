@@ -14,14 +14,18 @@
         <header>
             <div class="container">
                 <div class="site-header">
-                    <a class="logo" href="{{ url_for('index') }}"><i class="material-icons">library_books</i></a>
+                    <div style="width:33%;display:inline-block;"><a class="logo" href="{{ url_for('index') }}"><i class="material-icons">library_books</i></a></div>
                     {% if current_user.is_authenticated %}
-                    <a href="#" title="User Home">Hello {{ current_user.username }}</a>
-                    <a class="button icon-right" href="{{ url_for('logout') }}"><span>Logout</span></a>
-                    <a class="button icon-right" href="{{ url_for('entry') }}"><span>New Entry</span> <i class="material-icons">add</i></a>
+                    <div style="width:32.5%;display:inline-block;text-align:center;"><h1>Hello {{ current_user.username }}</h1></div>
+                    <div style="width:33%;display:inline-block;">
+                        <a class="button icon-right" href="{{ url_for('logout') }}"><span>Logout</span></a>
+                        <a class="button icon-right" href="{{ url_for('entry') }}"><span>New Entry</span> <i class="material-icons">add</i></a>
+                    </div>
                     {% else %}
-                    <a class="button icon-right" href="{{ url_for('signup') }}"><span>Sign Up</span></a>
-                    <a class="button icon-right" href="{{ url_for('login') }}"><span>Login</span></a>
+                    <div style="width:33%;display:inline-block;">
+                        <a class="button icon-right" href="{{ url_for('signup') }}"><span>Sign Up</span></a>
+                        <a class="button icon-right" href="{{ url_for('login') }}"><span>Login</span></a>
+                    </div>
                     {% endif %}
                 </div>
             </div>

@@ -28,7 +28,7 @@
         <h3>Tags:</h3>
         <ul>
             {% for tag in entry_tags %}
-            <li>{{ tag.name }}</li>
+            <li><a href="{{ url_for('entries_by_tag', tag_id=tag.id) }}">{{ tag.name }}</a></li>
             {% endfor %}
         </ul>
     </div>

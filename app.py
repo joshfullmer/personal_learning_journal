@@ -102,6 +102,19 @@ def user_entries(username):
     return render_template('index.html', entries=entries, view_all=True)
 
 
+@app.route('/entries/by/tag/<tag_id>/')
+def entries_by_tag(tag_id):
+    try:
+        tag = models.Tag.get(models.Tag.id == tag_id)
+    except models.DoesNotExist:
+        abort(404)
+    entries = (models.Entry.select()
+                           .join(models.EntryTag)
+                           .join(models.Tag)
+                           .where(models.Tag.id == tag_id))
+    return render_template('index.html', entries=entries, view_all=True)
+
+
 @app.route('/entry', methods=('GET', 'POST'))
 @login_required
 def entry():
