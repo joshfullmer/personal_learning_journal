@@ -61,6 +61,7 @@ def index():
 
 
 def get_entry_or_404(slug):
+    """Similar to the get_object_or_404, but it searches on slug, not ID"""
     try:
         entry = models.Entry.select().where(models.Entry.slug == slug).get()
     except models.DoesNotExist:
@@ -97,13 +98,18 @@ def user_entries(username):
                               .get()
                               .entries
                               .order_by(models.Entry.date.desc()))
+        entry_tags = []
     except models.DoesNotExist:
         abort(404)
-    return render_template('index.html', entries=entries, view_all=True)
+    return render_template('index.html',
+                           entries=entries,
+                           entry_tags=entry_tags,
+                           view_all=True)
 
 
 @app.route('/entries/by/tag/<tag_id>/')
 def entries_by_tag(tag_id):
+    """Show all entries by the given tag id number"""
     try:
         tag = models.Tag.get(models.Tag.id == tag_id)
     except models.DoesNotExist:
@@ -160,6 +166,7 @@ def edit_entry(slug):
 @app.route('/tags/create/', methods=('GET', 'POST'))
 @login_required
 def tag():
+    """Create a tag"""
     form = forms.TagForm()
     if form.validate_on_submit():
         models.Tag.create(name=form.name.data)
@@ -171,6 +178,7 @@ def tag():
 @app.route('/entries/<slug>/tags/', methods=('GET', 'POST'))
 @login_required
 def apply_tag(slug):
+    """Applies a tag to the entry using the given slug"""
     form = forms.EntryTagForm(request.form)
     tags = models.Tag.select()
     entry = get_entry_or_404(slug)
@@ -179,9 +187,12 @@ def apply_tag(slug):
         entry_tags = (models.EntryTag.select()
                                      .where(models.EntryTag.entry == entry.id))
         existing_entry_tags = []
+
+        # Check if the tag is already applied
         for entry_tag in entry_tags:
             existing_entry_tags += [entry_tag.tag.id]
         for selection in request.form.getlist('tags'):
+            # Skips applying tags if it has already been applied
             if int(selection) in existing_entry_tags:
                 continue
             models.EntryTag.create(
@@ -196,13 +207,14 @@ def apply_tag(slug):
 @app.route('/entries/<slug>/tags/remove/', methods=('GET', 'POST'))
 @login_required
 def remove_tag(slug):
+    """Remove slugs from the entry by slug"""
     form = forms.EntryTagForm(request.form)
     entry = get_entry_or_404(slug)
     e_id = entry.id
     entry_tags = (models.EntryTag.select()
                                  .where(models.EntryTag.entry == entry.id))
     entry_tag_ids = [et.tag.id for et in entry_tags]
-    tags = models.Tag.select().where(models.Tag.id in entry_tag_ids)
+    tags = models.Tag.select().where(models.Tag.id << entry_tag_ids)
     form.tags.choices = [(tag.id, tag.name) for tag in tags]
     if form.validate_on_submit():
         selections = [int(s) for s in request.form.getlist('tags')]

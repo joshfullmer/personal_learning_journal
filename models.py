@@ -80,8 +80,17 @@ class Entry(Model):
             slug=slug,
         )
 
+    def get_tags(self):
+        """Returns a peewee modelselect with all of the entry's tags"""
+        tags = (Tag.select()
+                   .join(EntryTag)
+                   .join(Entry)
+                   .where(Entry.id == self.id))
+        return tags
+
 
 class Tag(Model):
+    """Contains data for the tags"""
     name = CharField(max_length=50)
 
     class Meta:
@@ -90,6 +99,7 @@ class Tag(Model):
 
 
 class EntryTag(Model):
+    """Holds the relationship between entries and tags"""
     entry = ForeignKeyField(Entry, backref='entries')
     tag = ForeignKeyField(Tag, backref='tags')
 

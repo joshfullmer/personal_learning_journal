@@ -22,6 +22,7 @@
                         <a class="button icon-right" href="{{ url_for('entry') }}"><span>New Entry</span> <i class="material-icons">add</i></a>
                     </div>
                     {% else %}
+                    <div style="width:32.5%;display:inline-block;text-align:center;"><h1>Hello!</h1></div>
                     <div style="width:33%;display:inline-block;">
                         <a class="button icon-right" href="{{ url_for('signup') }}"><span>Sign Up</span></a>
                         <a class="button icon-right" href="{{ url_for('login') }}"><span>Login</span></a>
@@ -48,6 +49,13 @@
                         <time datetime="{{ entry.date.strftime("%Y-%m-%d") }}">{{ entry.date.strftime("%B %-d, %Y") }}</time>
                         <br>
                         <span>By: <a href="{{ url_for('user_entries', username=entry.user.username) }}">{{ entry.user.username }}</a></span>
+                        {% if entry.get_tags().count() > 0 %}
+                        <ul>
+                            {% for tag in entry.get_tags() %}
+                            <li style="display:inline;"><a href="{{ url_for('entries_by_tag', tag_id=tag.id) }}">{{ tag.name }}</a></li>
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
                     </article>
                     {% endfor %}
                 </div>
