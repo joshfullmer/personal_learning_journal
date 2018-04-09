@@ -140,10 +140,10 @@
         },
         "peewee": {
             "hashes": [
-                "sha256:c57fa818062a4137e79619a40e97c19c839b54381bceec3e7bd040b3252e7867"
+                "sha256:e31771a5a18576336eaf7883d1b4bfd9478d0af02ff5a8f932ec1c5ef56ca7e5"
             ],
             "index": "pypi",
-            "version": "==3.1.5"
+            "version": "==3.2.2"
         },
         "pycparser": {
             "hashes": [
@@ -153,11 +153,10 @@
         },
         "python-slugify": {
             "hashes": [
-                "sha256:57a385df7a1c6dbd15f7666eaff0ff29d3f60363b228b1197c5308ed3ba5f824",
-                "sha256:c3733135d3b184196fdb8844f6a74bbfb9cf6720d1dcce3254bdc434353f938f"
+                "sha256:5dbb360b882b2dabe0471a1a92f604504d83c2a73c71f2098d004ab62e695534"
             ],
             "index": "pypi",
-            "version": "==1.2.4"
+            "version": "==1.2.5"
         },
         "six": {
             "hashes": [
