@@ -46,7 +46,7 @@
                     {% for entry in entries %}
                     <article>
                         <h2><a href="{{ url_for('view_entry', slug=entry.slug)}}">{{ entry.title }}</a></h2>
-                        <time datetime="{{ entry.date.strftime("%Y-%m-%d") }}">{{ entry.date.strftime("%B %-d, %Y") }}</time>
+                        <time datetime="{{ entry.date.strftime("%Y-%m-%d") }}">{{ entry.date.strftime("%B %d, %Y") }}</time>
                         <br>
                         <span>By: <a href="{{ url_for('user_entries', username=entry.user.username) }}">{{ entry.user.username }}</a></span>
                         {% if entry.get_tags().count() > 0 %}
